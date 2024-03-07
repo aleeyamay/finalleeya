@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist with Reviews</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            background-image: url("wall.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            text-align: center;
+        }
+        header {
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+        }
+        .container2 {
+            display: flex;
+            margin-left: 450px;
+        }
+        .container2 a {
+            color: white;
+            text-decoration: none;
+        }
+        .logo {
+            height: 80px;
+            width: 80px;
+            margin: 20px 0px 20px 40px;
+        }
+        h1 {
+            font-size: 28px;
+            color: white;
+            margin: 50px 0px 20px 40px;
+        }
+        .col-a,.col-b,.col-c,.col-d {
+            width: 100px;
+            padding: 60px 50px 0px 30px;
+        }
+        .country-box {
+            display: inline-block;
+            align-items: center;
+            margin: 10px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            position: relative; /* Add position relative */
+            width: 600px; /* Adjust width as needed */
+        }
+        .country-box img {
+            width: 50px; /* Adjust width of country flag */
+            height: auto; /* Keep aspect ratio */
+            margin-right: 10px;
+        }
+        .country-box span {
+            font-size: 20px; 
+            font-weight: bold; 
+        }
+        .review-section {
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto; 
+            margin-top: 10px; 
+        }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .review-form .button,.reviewed-button {
+            margin-top: 20px;
+            margin-left: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .update-button,.delete-button {
+            position: absolute;
+            top: 5px;
+            padding: 5px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+        }
+
+        .update-button {
+            left: 5px;
+        }
+
+        .delete-button {
+            right: 5px; 
+        }
+
+        .review-form {
+            margin-top: 10px;
+        }
+
+        .review {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .review p {
+            margin: 5px 0;
+        }
+
+        textarea,input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px solid white;
+        }
+
+        #countryInput {
+            width: 80%;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            border: none; /* Added to remove black outline */
+        }
+
+        #userCountryList {
+            text-align: center;
+        }
+        .button {
+            margin-top: 20px;
+            margin-left: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .reviewed-button {
+            margin-top: 20px;
+            margin-left: 10px;
+            padding: 10px 20px; 
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 170px;
+            height: 40px; 
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="headerlogo">
+            <img src="logotravel.jpg" class="logo">
+        </div>
+        <div class="headertext">
+            <h1>GlobeTrekker</h1>
+        </div>
+        <div class="container2">
+            <div class="col-a">
+                <a href="index.html" class="button-link">Home</a>
+            </div>
+            <div class="col-b">
+                <a href="destination.html" class="button-link">Destination</a>
+            </div>
+            <div class="col-c">
+                <a href="topcountry.html" class="button-link">Top Countries</a>
+            </div>
+            <div class="col-d">
+                <a href="review.html" class="button-link">Reviews</a>
+            </div>
+        </div>    
+    </header>
+    <input type="text" id="countryInput" placeholder="Search for a country" onkeypress="handleKeyPress(event)">
+    <button onclick="addReviewForm()" class="button">Search</button>
+    <h1>Review Checklist</h1>
+    <div id="userCountryList">
+        <!-- User-entered country list will be displayed here -->
+    </div>
+
+    <div id="reviewSection" class="review-section"></div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            displayUserCountryList();
+        });
+
+        async function addReviewForm() {
+            const countryInput = document.getElementById('countryInput').value.trim();
+            if (countryInput !== '') {
+                try {
+                    const response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(countryInput)}?fullText=true`);
+                    const countryData = await response.json();
+                    if (Array.isArray(countryData) && countryData.length > 0) {
+                        const country = countryData[0];
+                        displayCountryInfo(country);
+                    } else {
+                        alert('Country not found!');
+                    }
+                } catch (error) {
+                    console.error('Error adding country:', error);
+                }
+            } else {
+                alert('Please enter a country name!');
+            }
+        }
+
+        function displayCountryInfo(country) {
+            const userCountryListContainer = document.getElementById('userCountryList');
+            userCountryListContainer.innerHTML = '';
+            
+            const countryBox = document.createElement('div');
+            countryBox.classList.add('country-box');
+            const countryImg = document.createElement('img');
+            countryImg.src = country.flags.png;
+            const countryName = document.createElement('span');
+            countryName.textContent = country.name.common;
+
+            const reviewForm = document.createElement('div');
+            reviewForm.classList.add('review-form');
+            reviewForm.innerHTML = `
+                <h3>Write Review for ${country.name.common}</h3>
+                <textarea id="reviewText" placeholder="Write your review"></textarea>
+                <input type="number" id="reviewRating" placeholder="Rating (1-5)">
+                <button onclick="submitReview('${country.name.common}')" class="button">Submit Review</button>
+                <button onclick="goBack()" class="button">Back</button>
+            `;
+
+            countryBox.appendChild(countryImg);
+            countryBox.appendChild(countryName);
+            countryBox.appendChild(reviewForm);
+
+            userCountryListContainer.appendChild(countryBox);
+        }
+
+        async function submitReview(countryName) {
+            const reviewText = document.getElementById('reviewText').value.trim();
+            const reviewRating = document.getElementById('reviewRating').value.trim();
+
+            if (reviewText === '' || reviewRating === '') {
+                alert('Please enter both review text and rating.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(countryName)}?fullText=true`);
+                const countryData = await response.json();
+                if (Array.isArray(countryData) && countryData.length > 0) {
+                    const country = countryData[0];
+                    const userCountryList = JSON.parse(localStorage.getItem('userCountryList')) || [];
+                    const index = userCountryList.findIndex(c => c.name.common === countryName);
+                    if (index !== -1) {
+                        if (!userCountryList[index].reviews) {
+                            userCountryList[index].reviews = [];
+                        }
+                        userCountryList[index].reviews.push({ text: reviewText, rating: reviewRating });
+                    } else {
+                        if (!country.reviews) {
+                            country.reviews = [];
+                        }
+                        country.reviews.push({ text: reviewText, rating: reviewRating });
+                        userCountryList.push(country);
+                    }
+                    localStorage.setItem('userCountryList', JSON.stringify(userCountryList));
+                    alert('Review submitted successfully!');
+                    if (confirm('Do you want to give another review?')) {
+                        location.reload();
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    alert('Country not found!');
+                }
+            } catch (error) {
+                console.error('Error submitting review:', error);
+            }
+        }
+
+        async function displayReviews(country) {
+        const userCountryListContainer = document.getElementById('userCountryList');
+        userCountryListContainer.innerHTML = '';
+        
+        const countryBox = document.createElement('div');
+        countryBox.classList.add('country-box');
+        const countryImg = document.createElement('img');
+        countryImg.src = country.flags.png;
+        const countryName = document.createElement('span');
+        countryName.textContent = country.name.common;
+
+        const reviewSection = document.createElement('div');
+        reviewSection.classList.add('review');
+        reviewSection.innerHTML = '<h3>Reviews</h3>';
+        if (country.reviews && country.reviews.length > 0) {
+            country.reviews.forEach((review, index) => {
+                const reviewElement = document.createElement('div');
+                reviewElement.innerHTML = `<p>${review.text} - Rating: ${review.rating}</p>`;
+                
+                const updateButton = document.createElement('button');
+                updateButton.textContent = 'Update';
+                updateButton.classList.add('update-button');
+                updateButton.onclick = function() {
+                    updateReview(country.name.common, index);
+                };
+                reviewElement.appendChild(updateButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.classList.add('delete-button');
+                deleteButton.onclick = function() {
+                    deleteReview(country.name.common, index);
+                };
+                reviewElement.appendChild(deleteButton);
+
+                reviewSection.appendChild(reviewElement);
+            });
+        } else {
+            reviewSection.innerHTML += '<p>No reviews available</p>';
+        }
+
+        const backButton = document.createElement('button');
+        backButton.textContent = 'Back';
+        backButton.classList.add('back-button');
+        backButton.onclick = function() {
+            location.reload();
+        };
+
+        countryBox.appendChild(countryImg);
+        countryBox.appendChild(countryName);
+        countryBox.appendChild(reviewSection);
+        countryBox.appendChild(backButton);
+
+        userCountryListContainer.appendChild(countryBox);
+    }
+        async function updateReview(countryName, reviewIndex) {
+    const userCountryList = JSON.parse(localStorage.getItem('userCountryList')) || [];
+    const index = userCountryList.findIndex(c => c.name.common === countryName);
+    if (index !== -1 && userCountryList[index].reviews && userCountryList[index].reviews.length > reviewIndex) {
+        const reviewSection = document.getElementById('reviewSection');
+        const updateForm = document.createElement('form');
+        updateForm.innerHTML = `
+            <div id="reviewSection">
+                <input type="text" id="updatedReviewText" placeholder="Enter updated review text" style="width: 300px; height: 40px;" required>
+                <input type="number" id="updatedReviewRating" placeholder="Enter updated rating (1-5)" min="1" max="5" style="width: 300px; height: 40px;" required>
+                <button type="submit" class="button" style="width: 200px; height: 40px;">Update Review</button>
+            </div>
+        `;
+        reviewSection.appendChild(updateForm);
+
+        updateForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const updatedReviewText = document.getElementById('updatedReviewText').value.trim();
+            const updatedReviewRating = document.getElementById('updatedReviewRating').value.trim();
+            
+            if (updatedReviewText !== '' && updatedReviewRating !== '') {
+                userCountryList[index].reviews[reviewIndex].text = updatedReviewText;
+                userCountryList[index].reviews[reviewIndex].rating = updatedReviewRating;
+                localStorage.setItem('userCountryList', JSON.stringify(userCountryList));
+                alert('Review updated successfully!');
+                reviewSection.removeChild(updateForm);
+                // Reload the reviews section without refreshing the whole page
+                displayReviews(userCountryList[index]);
+            } else {
+                alert('Please enter both review text and rating.');
+            }
+        });
+    } else {
+        alert('Failed to update review.');
+    }
+}
+        async function deleteReview(countryName, reviewIndex) {
+            const userCountryList = JSON.parse(localStorage.getItem('userCountryList')) || [];
+            const index = userCountryList.findIndex(c => c.name.common === countryName);
+            if (index !== -1 && userCountryList[index].reviews && userCountryList[index].reviews.length > reviewIndex) {
+                userCountryList[index].reviews.splice(reviewIndex, 1);
+                localStorage.setItem('userCountryList', JSON.stringify(userCountryList));
+                alert('Review deleted successfully!');
+                location.reload();
+            } else {
+                alert('Failed to delete review.');
+            }
+        }
+
+        async function displayReviewForm(country) {
+            const userCountryListContainer = document.getElementById('userCountryList');
+            userCountryListContainer.innerHTML = '';
+            
+            const countryBox = document.createElement('div');
+            countryBox.classList.add('country-box');
+            const countryImg = document.createElement('img');
+            countryImg.src = country.flags.png;
+            const countryName = document.createElement('span');
+            countryName.textContent = country.name.common;
+
+            const reviewForm = document.createElement('div');
+            reviewForm.classList.add('review-form');
+            reviewForm.innerHTML = `
+                <h3>Write Review for ${country.name.common}</h3>
+                <textarea id="reviewText" placeholder="Write your review"></textarea>
+                <input type="number" id="reviewRating" placeholder="Rating (1-5)">
+                <button onclick="submitReview('${country.name.common}')" class="button">Submit Review</button>
+                <button onclick="goBack()" class="button">Back</button>
+            `;
+
+            countryBox.appendChild(countryImg);
+            countryBox.appendChild(countryName);
+            countryBox.appendChild(reviewForm);
+
+            userCountryListContainer.appendChild(countryBox);
+        }
+
+        function displayUserCountryList() {
+            const userCountryList = JSON.parse(localStorage.getItem('userCountryList')) || [];
+            const userCountryListContainer = document.getElementById('userCountryList');
+            userCountryListContainer.innerHTML = '';
+            userCountryList.forEach((country, index) => {
+                if (country.reviews && country.reviews.length > 0) {
+                    const countryBox = document.createElement('div');
+                    countryBox.classList.add('country-box');
+                    const countryImg = document.createElement('img');
+                    countryImg.src = country.flags.png;
+                    const countryName = document.createElement('span');
+                    countryName.textContent = country.name.common;
+
+                    const readReviewButton = document.createElement('button');
+                    readReviewButton.textContent = 'Read Reviews';
+                    readReviewButton.onclick = function() {
+                        displayReviews(country);
+                    };
+
+                    const giveReviewButton = document.createElement('button');
+                    giveReviewButton.textContent = 'Give Review';
+                    giveReviewButton.onclick = function() {
+                        displayReviewForm(country);
+                    };
+
+                    readReviewButton.classList.add('reviewed-button');
+                    giveReviewButton.classList.add('reviewed-button');
+
+                    countryBox.appendChild(countryImg);
+                    countryBox.appendChild(countryName);
+                    countryBox.appendChild(readReviewButton);
+                    countryBox.appendChild(giveReviewButton);
+
+                    userCountryListContainer.appendChild(countryBox);
+                }
+            });
+        }
+
+
+        function handleKeyPress(event) {
+            if (event.keyCode === 13) {
+                addReviewForm();
+            }
+        }
+
+        function goBack() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

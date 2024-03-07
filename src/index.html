@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            background-image: url("wall.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            text-align: center;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .country-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .country-info-item {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            margin-right: 10px;
+        }
+        .country-info-item:last-child {
+            margin-right: 0;
+        }
+        #flag {
+            max-width: 100%;
+            border-radius: 6px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        select {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        #map {
+            margin-top: 20px;
+            height: 300px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        header {
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+        }
+        .container2 {
+            display: flex;
+            margin-left: 450px;
+        }
+        .container2 a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .col-a, .col-b, .col-c, .col-d {
+            width: 100px;
+            padding: 60px 50px 0px 30px;
+        } 
+        .logo {
+            height: 80px;
+            width: 80px;
+            margin: 20px 0px 20px 40px;
+        }
+        h1 {
+            font-size: 28px;
+            color: white;
+            margin: 50px 0px 20px 40px;
+        }
+
+        .travelsentence h1 {
+            padding-right: 30px;
+            color: white;
+            font-size: 100px;
+        }
+
+        .travelsentence h4 {
+            color: white;
+            font-size: 18px;
+            text-align: left;
+            max-width: 600px;
+            padding-left: 60px;
+        }
+        .flag-container img {
+            height: 100px;
+            width: 200px;
+            display: flex;
+            height: auto;
+            margin: 10px 20px 10px 10px;
+        }
+
+        button {
+            display: flex;
+            margin: 70px 7px 70px 7px;
+            padding: 10px 72px 10px 72px;
+            font-size: 18px; 
+        }
+        #exampleSection{
+            margin-top:150px ;
+            text-align: center;
+            background-color: white;
+            height: 200px;
+            width: 300px;
+            border-radius: 5px;
+        }
+        #letgo {
+            margin-top: 50px;
+            margin-left: 200px;
+            padding: 10px 10px 10px 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="headerlogo">
+            <img src="logotravel.jpg" class="logo">
+        </div>
+        <div class="headertext">
+            <h1>GlobeTrekker</h1>
+        </div>
+        <div class="container2">
+            <div class="col-a">
+                <a href="index.html" class="button-link">Home</a>
+            </div>
+            <div class="col-b">
+                <a href="destination.html" class="button-link">Destination</a>
+            </div>
+            <div class="col-c">
+                <a href="topcountry.html" class="button-link">Top Countries</a>
+            </div>
+            <div class="col-d">
+                <a href="review.html" class="button-link">Reviews</a>
+            </div>
+        </div>  
+    </header>
+
+    <section class="container">
+        <div class="travelsentence">
+            <h1 style="color: white; font-size: 100px;">TRAVELLING</h1>
+            <h4>Traveling is the best thing we could do every time we have a holiday and extra money, 
+                but to make it planned thoroughly and even<br> better, we should be doing a little
+                research to learn more about the country as a whole.
+            </h4>
+        </div>
+            <div id="countryFlags"></div>
+            <div id="countryButtons"></div>
+        
+        <div id="exampleSection" style="display: none;">
+            <!-- Example content to display when a button under a country flag is clicked -->
+            <h2>Country Information</h2>
+            <p>Get to know me and other country more by visiting destination page!</p>
+            <button onclick="window.location.href='destination.html'" id="letgo">Let's Go</button>
+        </div>
+        
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const countryFlagsContainer = document.getElementById('countryFlags');
+            const countryButtonsContainer = document.getElementById('countryButtons');
+            const exampleSection = document.getElementById('exampleSection');
+
+            // Fetch data for three countries
+            fetch('https://restcountries.com/v3.1/all')
+                .then(response => response.json())
+                .then(data => {
+                    // Iterate over the first three countries
+                    for (let i = 0; i < 3; i++) {
+                        const country = data[i];
+                        const countryCode = country.cca3;
+
+                        // Create and append flag image
+                        const flagContainer = document.createElement('div');
+                        flagContainer.classList.add('flag-container');
+                        const flagImg = document.createElement('img');
+                        flagImg.src = country.flags.png;
+                        flagImg.alt = country.name.common;
+                        flagContainer.appendChild(flagImg);
+                        countryFlagsContainer.appendChild(flagContainer);
+
+                        // Create and append country button
+                        const countryButton = document.createElement('button');
+                        countryButton.textContent = country.name.common;
+                        countryButton.dataset.countryCode = countryCode; // Store country code as dataset
+                        countryButtonsContainer.appendChild(countryButton);
+
+                        // Add event listener to each button
+                        countryButton.addEventListener('click', function() {
+                            const countryCode = this.dataset.countryCode;
+                            displayCountryInfo(countryCode);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching country data:', error));
+
+            // Function to display country information
+            function displayCountryInfo(countryCode) {
+                // Placeholder for displaying country information
+                exampleSection.style.display = 'block'; // Display example section
+            }
+        });
+    </script>
+</body>
+</html>
